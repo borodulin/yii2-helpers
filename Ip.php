@@ -6,7 +6,10 @@
  */
 
 namespace conquer\helpers;
-
+/**
+ * 
+ * @link http://stackoverflow.com/questions/15699101/get-the-client-ip-address-using-php
+ */
 class Ip
 {
 	/**

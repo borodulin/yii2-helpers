@@ -7,6 +7,9 @@
 
 namespace conquer\helpers;
 
+/**
+ * @author Andrey Borodulin
+ */
 class Array2Xml
 {
 
@@ -29,7 +32,12 @@ class Array2Xml
 			$xml = "<$key>".htmlspecialchars($value)."</$key>";
 		return $xml;
 	}
-	
+	/**
+	 * Converts PHP array to xml.
+	 * @param array $array
+	 * @param string $rootTag
+	 * @return string
+	 */
 	public static function encodeXml($array, $rootTag='root')
 	{
 		$xml=static::toXml($array);
