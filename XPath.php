@@ -10,7 +10,6 @@ namespace conquer\helpers;
 /**
  * 
  * @author Andrey Borodulin
- *
  */
 class XPath
 {
