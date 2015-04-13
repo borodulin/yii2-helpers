@@ -21,7 +21,7 @@ class Json extends \yii\helpers\BaseJson
     public static function encode($value, $options = 320)
     {
     	array_walk_recursive($value, function(&$item){
-    		if(is_string($item) && (strpos('js:', $item)==0))
+    		if(is_string($item) && (strpos('js:', $item)===0))
     			$item = new JsExpression(substr($item,3));
     	});
     	return parent::encode($value, $options);
