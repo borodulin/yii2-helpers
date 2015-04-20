@@ -19,13 +19,13 @@ class XPath
 	
 	public function __construct($content, $html=false)
 	{
-		$this->_doc=new DOMDocument();
+		$this->_doc=new \DOMDocument();
 		if($html)
 			@$this->_doc->loadHTML($content);
 		else{
 			@$this->_doc->loadXML($xml);
 		}
-		$this->_xpath = new DOMXpath($this->_doc);
+		$this->_xpath = new \DOMXpath($this->_doc);
 	}
 	
 	public static function isAssociative($array)
@@ -40,7 +40,7 @@ class XPath
 	 */
 	public static function xmlToArray($elements)
 	{
-		if($elements instanceof DOMNodeList){
+		if($elements instanceof \DOMNodeList){
 			if($elements->length==0)
 				return null;
 			elseif($elements->length==1)
@@ -54,7 +54,7 @@ class XPath
 				return $result;
 			}
 		}
-		elseif($elements instanceof DOMNode){
+		elseif($elements instanceof \DOMNode){
 			if($elements->hasChildNodes()){
 				$result=array();
 				foreach ($elements->childNodes as $element){
