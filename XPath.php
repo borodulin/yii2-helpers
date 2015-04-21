@@ -23,7 +23,7 @@ class XPath
 		if($html)
 			@$this->_doc->loadHTML($content);
 		else{
-			@$this->_doc->loadXML($xml);
+			$this->_doc->loadXML($content);
 		}
 		$this->_xpath = new \DOMXpath($this->_doc);
 	}
