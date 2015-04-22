@@ -16,7 +16,11 @@ class XPath
 	private $_doc;
 	private $_xpath;
 	
-	
+	/**
+	 * 
+	 * @param string $content
+	 * @param boolean $html Parse text as html
+	 */
 	public function __construct($content, $html=false)
 	{
 		$this->_doc=new \DOMDocument();
@@ -35,7 +39,7 @@ class XPath
 	
 	/**
 	 * 
-	 * @param DOMNodeList $elements
+	 * @param \DOMNodeList $elements
 	 * @return multitype:multitype:NULL
 	 */
 	public static function xmlToArray($elements)
@@ -87,8 +91,10 @@ class XPath
 	
 	/**
 	 * 
-	 * @param array() $paths
-	 * @return array()
+	 * @param array $paths
+	 * @param \DOMNode $contextNode
+	 * @param boolean $assoc
+	 * @return array
 	 */
 	public function queryAll($paths, $contextNode=null, $assoc=true)
 	{
@@ -102,7 +108,13 @@ class XPath
 		}
 		return $result;
 	}
-	
+	/**
+	 * 
+	 * @param string $path
+	 * @param \DOMNode $contextNode
+	 * @param boolean $assoc
+	 * @return array|\DOMNodeList|NULL
+	 */
 	public function query($path, $contextNode=null, $assoc=true)
 	{
 		$elements=$this->_xpath->query($path,$contextNode);
@@ -115,7 +127,13 @@ class XPath
 		return null;
 	}
 
-	
+	/**
+	 * 
+	 * @param string $path
+	 * @param \DOMNode $contextNode
+	 * @param boolean $assoc
+	 * @return array|\DOMNode|NULL
+	 */
 	public function queryOne($path, $contextNode=null, $assoc=true)
 	{
 		$elements=$this->_xpath->query($path,$contextNode);
@@ -128,7 +146,11 @@ class XPath
 		}
 		return null;
 	}
-	
+	/**
+	 * 
+	 * @param \DOMNode $node
+	 * @return integer
+	 */
 	public function getNodePos($node)
 	{
 		$prevSibling=$node->previousSibling;
@@ -139,7 +161,13 @@ class XPath
 		}
 		return $pos;
 	} 
-	
+	/**
+	 * 
+	 * @param string $path XPath
+	 * @param \DOMNode $contextNode
+	 * @throws CException
+	 * @return integer|NULL
+	 */
 	public function findPos($path,$contextNode=null)
 	{
 		try {
@@ -160,7 +188,12 @@ class XPath
 			throw new CException($e->getMessage().' : '.$path);
 		}
 	}
-	
+	/**
+	 * 
+	 * @param array $paths
+	 * @param \DOMNode $contextNode
+	 * @return array
+	 */
 	public function findPosAll($paths,$contextNode=null)
 	{
 		$result=array();
@@ -170,10 +203,15 @@ class XPath
 		return $result; 
 	}
 	
-	
-	public function evalute($path, $contaxtNode=null, $text=true)
+	/**
+	 * 
+	 * @param string $path
+	 * @param \DOMNode $contextNode
+	 * @return NULL|mixed
+	 */
+	public function evalute($path, $contextNode=null)
 	{
-		$entries=$this->_xpath->evaluate($path, $contaxtNode);
+		$entries=$this->_xpath->evaluate($path, $contextNode);
 		if(is_a($entries, 'DOMNodeList'))
 			if($entries->length>0)
 				return $entries->item(0)->nodeValue; 
@@ -186,13 +224,17 @@ class XPath
 	}
 	
 	/**
-	 * @return DOMXpath
+	 * @return \DOMXpath
 	 */
 	public function getXPath()
 	{
 		return $this->_xpath;
 	}
-
+	/**
+	 * Recursive clears all text in array
+	 * @param string $value
+	 * @return string|NULL
+	 */
 	public static function clearTextConcat($value)
 	{
 		if(is_string($value))
@@ -206,7 +248,10 @@ class XPath
 		}
 		return null;
 	}
-	
+	/**
+	 * Clears text
+	 * @param string $value
+	 */
 	public static function clearText(&$value)
 	{
 		if(is_string($value))
@@ -220,7 +265,7 @@ class XPath
 	
 	/**
 	 * 
-	 * @return DOMDocument
+	 * @return \DOMDocument
 	 */
 	public function getDoc()
 	{
@@ -230,5 +275,59 @@ class XPath
 	public function registerNamespace($prefix, $namespaceURI)
 	{
 		$this->_xpath->registerNamespace($prefix, $namespaceURI);
+	}
+	/**
+	 * 
+	 * @param string $path
+	 * @param string $value
+	 * @param \DOMNode $contextNode
+	 * @return boolean
+	 */
+	public function updateOne($path, $value, $contextNode=null)
+	{
+		$elements=$this->_xpath->query($path,$contextNode);
+		if($elements->length>0){
+			$el=$elements->item(0);
+			$el->nodeValue=$value;
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * 
+	 * @param string $path
+	 * @param string $value
+	 * @param \DOMNode $contextNode
+	 * @return boolean
+	 */
+	public function update($path, $value, $contextNode=null)
+	{
+		$elements=$this->_xpath->query($path,$contextNode);
+		if($elements->length>0){
+			foreach ($elements as $el){
+				$el->nodeValue=$value;
+			}
+			return true;
+		}
+		return false;
+	}
+	/**
+	 * 
+	 * @param array $paths [XPath=>Value]
+	 * @param string $contextNode
+	 */
+	public function updateAll($paths, $contextNode=null)
+	{
+		$result=0;
+		foreach ($paths as $path=>$value){
+			$elements=$this->_xpath->query($path, $contextNode);
+			if($elements->length>0){
+				foreach ($elements as $el){
+					$el->nodeValue=$value;
+					$result++;
+				}
+			}
+		}
+		return $result;
 	}
 }
