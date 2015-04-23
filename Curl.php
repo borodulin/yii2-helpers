@@ -11,7 +11,7 @@ namespace conquer\helpers;
  * 
  * @author Andrey Borodulin
  */
-class Url
+class Curl
 {
 
 	private function defaultOpts(){
