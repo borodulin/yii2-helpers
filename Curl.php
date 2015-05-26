@@ -13,7 +13,6 @@ namespace conquer\helpers;
  */
 class Curl
 {
-
     private function defaultOpts(){
         return array(
                 CURLOPT_RETURNTRANSFER => true,
@@ -75,8 +74,12 @@ class Curl
      */
     public $errorMessage;
 
-    
-    public function __construct($url, $options=array(), $postData=array())
+    /**
+     * @param string $url
+     * @param array $options
+     * @param mixed $postData
+     */
+    public function __construct($url, $options = [], $postData = [])
     {
         foreach ($this->defaultOpts() as $k => $v){
             if(!isset($options[$k]))
@@ -87,17 +90,25 @@ class Curl
             $options[CURLOPT_POST] = true;
             $options[CURLOPT_POSTFIELDS] = $postData;
         }
-        
+        $this->url = $url;
         $this->options = $options;
         $this->postData = $postData;
     }
-    
+    /**
+     * @see CURLOPT_HEADERFUNCTION
+     * @param resource $ch
+     * @param string $headerLine
+     * @return number
+     */
     public function headerCallback($ch, $headerLine)
     {
         $this->header .= $headerLine;
         return strlen($headerLine);
     }
-    
+    /**
+     * Returns the cookies of executed request
+     * @return string|NULL
+     */
     public function getCookies()
     {
         if(preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $this->header, $matches)){
@@ -105,20 +116,26 @@ class Curl
         }
         return null;
     }
-    
+    /**
+     * Checks if it is good http code 
+     * @return boolean
+     */
     public function isHttpOK()
     {
         return (strncmp($this->info['http_code'],'2',1) == 0);
     }
-
+    /**
+     * Executes the single curl
+     * @return boolean
+     */
     public function execute()
     {
         $ch = curl_init();
         
         // !important see headerCallback()
-        $options[CURLOPT_HEADER] = false;
+        $this->options[CURLOPT_HEADER] = false;
         
-        $options[CURLOPT_URL] = $this->url;
+        $this->options[CURLOPT_URL] = $this->url;
     
         curl_setopt_array($ch, $this->options);
         
@@ -144,7 +161,7 @@ class Curl
     }
     
     /**
-     * 
+     * Executes parallels curls
      * @param Curl[] $urls
      */
     public static function multiExec($urls)
@@ -154,6 +171,9 @@ class Curl
         foreach ($urls as $url){
             $ch = curl_init();
             $nodes[] = ['ch'=>$ch, 'url'=>$url];
+            // !important see headerCallback()
+            $url->options[CURLOPT_HEADER] = false;
+            $url->options[CURLOPT_URL] = $url->url;
             curl_setopt_array($ch, $url->options);
         }
         $mh = curl_multi_init();
