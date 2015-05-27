@@ -143,10 +143,10 @@ class Curl
 
         $this->errorCode = curl_errno($ch);
     
+        $this->info = curl_getinfo($ch);
+        
         if($this->errorCode)
             $this->errorMessage = curl_error($ch);
-        else
-            $this->info = curl_getinfo($ch);
         
         curl_close($ch);
             
