@@ -8,10 +8,18 @@
 namespace conquer\helpers;
 
 /**
+ * @property string $url
+ * @property string $header   
+ * @property array $options
+ * @property string $content
+ * @property integer $errorCode
+ * @property string $errorMessage
+ * @property string $cookies
+ * @property array $info
  * 
  * @author Andrey Borodulin
  */
-class Curl
+class Curl extends \yii\object
 {
    use CurlTrait;
 
@@ -37,17 +45,17 @@ class Curl
     public function execute($url = null, $postData = null)
     {
         if(!is_null($url))
-            $this->url = $this->url;
+            $this->setUrl($url);
         
         if(!is_null($postData))
             $this->setPostData($postData);
     
         $this->curl_execute();
             
-        if($this->getErrorCode())
+        if($this->_errorCode)
             return false;
         else if(!$this->isHttpOK()){
-            $this->errorMessage = $this->getContent();
+            $this->_errorMessage = $this->getContent();
             return false;
         }
         else

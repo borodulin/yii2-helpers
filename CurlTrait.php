@@ -9,15 +9,6 @@ namespace conquer\helpers;
 
 /**
  * 
- * @property string $url
- * @property string $header   
- * @property array $options
- * @property string $content
- * @property integer $errorCode
- * @property string $errorMessage
- * @property string $cookies
- * @property array $info
- * 
  * @author Andrey Borodulin
  */
 trait CurlTrait 
