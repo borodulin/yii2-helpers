@@ -13,66 +13,7 @@ namespace conquer\helpers;
  */
 class Curl
 {
-    private function defaultOpts(){
-        return array(
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_AUTOREFERER => true,
-                CURLOPT_HEADER => false,
-                CURLOPT_HEADERFUNCTION => array($this, 'headerCallback'),
-                CURLOPT_MAXREDIRS => 5,
-                CURLOPT_CONNECTTIMEOUT => 30,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_TIMEOUT => 30,
-        );
-    }
-    /**
-     * CURL Options
-     * @see curl_setopt_array
-     * @var array
-     */
-    public $options;
-    /**
-     * You can use http_build_query function to post as url encoded parameters
-     * @see CURLOPT_POSTFIELDS
-     * @var mixed
-     */
-    public $postData;
-    /**
-     * Url
-     * @see CURLOPT_URL
-     * @var string
-     */
-    public $url;
-    /**
-     * Content
-     * @see curl_exec
-     * @var string
-     */
-    public $content;
-    /**
-     * @see curl_getinfo
-     * @var array
-     */
-    public $info;
-    /**
-     * Header recieved with self::headerCallback() function
-     * @see CURLOPT_HEADERFUNCTION 
-     * @var string
-     */
-    public $header;
-    /**
-     * Error code
-     * @see curl_errno
-     * @var unknown
-     */
-    public $errorCode;
-    /**
-     * Error message
-     * @see curl_error
-     * @var string
-     */
-    public $errorMessage;
+   use CurlTrait;
 
     /**
      * @param string $url
@@ -81,79 +22,32 @@ class Curl
      */
     public function __construct($url, $options = [], $postData = [])
     {
-        foreach ($this->defaultOpts() as $k => $v){
-            if(!isset($options[$k]))
-                $options[$k] = $v;
-        }
-        
-        if(!empty($postData)){
-            $options[CURLOPT_POST] = true;
-            $options[CURLOPT_POSTFIELDS] = $postData;
-        }
-        $this->url = $url;
-        $this->options = $options;
-        $this->postData = $postData;
+        $this->setOptions($options);
+        if(!empty($postData))
+            $this->setPostData($postData);
+        $this->setUrl($url);
     }
-    /**
-     * @see CURLOPT_HEADERFUNCTION
-     * @param resource $ch
-     * @param string $headerLine
-     * @return number
-     */
-    public function headerCallback($ch, $headerLine)
-    {
-        $this->header .= $headerLine;
-        return strlen($headerLine);
-    }
-    /**
-     * Returns the cookies of executed request
-     * @return string|NULL
-     */
-    public function getCookies()
-    {
-        if(preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $this->header, $matches)){
-            return implode('; ', $matches[1]);
-        }
-        return null;
-    }
-    /**
-     * Checks if it is good http code 
-     * @return boolean
-     */
-    public function isHttpOK()
-    {
-        return (strncmp($this->info['http_code'],'2',1) == 0);
-    }
+
     /**
      * Executes the single curl
+     * @param string $url
+     * @param mixed $postData
      * @return boolean
      */
-    public function execute()
+    public function execute($url = null, $postData = null)
     {
-        $ch = curl_init();
+        if(!is_null($url))
+            $this->url = $this->url;
         
-        // !important see headerCallback()
-        $this->options[CURLOPT_HEADER] = false;
-        
-        $this->options[CURLOPT_URL] = $this->url;
+        if(!is_null($postData))
+            $this->setPostData($postData);
     
-        curl_setopt_array($ch, $this->options);
-        
-        $this->content = curl_exec($ch);
-
-        $this->errorCode = curl_errno($ch);
-    
-        $this->info = curl_getinfo($ch);
-        
-        if($this->errorCode)
-            $this->errorMessage = curl_error($ch);
-        
-        curl_close($ch);
+        $this->curl_execute();
             
-        if($this->errorCode)
+        if($this->getErrorCode())
             return false;
         else if(!$this->isHttpOK()){
-            $this->errorMessage = $this->content;
+            $this->errorMessage = $this->getContent();
             return false;
         }
         else
@@ -166,45 +60,7 @@ class Curl
      */
     public static function multiExec($urls)
     {
-        $nodes = array();
-        /* @var $url Curl */
-        foreach ($urls as $url){
-            $ch = curl_init();
-            $nodes[] = ['ch'=>$ch, 'url'=>$url];
-            // !important see headerCallback()
-            $url->options[CURLOPT_HEADER] = false;
-            $url->options[CURLOPT_URL] = $url->url;
-            curl_setopt_array($ch, $url->options);
-        }
-        $mh = curl_multi_init();
-        foreach ($nodes as $node){
-            curl_multi_add_handle($mh, $node['ch']);
-        }
-        //execute the handles
-        do {
-            curl_multi_exec($mh, $running);
-            curl_multi_select($mh);
-        } while($running > 0);
-        
-        foreach ($nodes as $node){
-            /* @var $url Curl */
-            $url = $node['url'];
-
-            $ch = $node['ch'];
-
-            $url->errorCode = curl_errno($ch);
-            if(!empty($url->errorCode))
-                $url->errorMessage = curl_error($ch);
-            else
-                $url->info = curl_getinfo($ch);
-
-            $url->content = curl_multi_getcontent($ch);
-        }
-        //close the handles
-        foreach ($nodes as $node){
-            curl_multi_remove_handle($mh, $node['ch']);
-        }
-        curl_multi_close($mh);
+        static::curl_multi_exec($urls);
     }
     
 }
