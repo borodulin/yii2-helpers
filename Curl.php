@@ -19,7 +19,7 @@ namespace conquer\helpers;
  * 
  * @author Andrey Borodulin
  */
-class Curl extends \yii\object
+class Curl extends \yii\base\Object
 {
    use CurlTrait;
 
