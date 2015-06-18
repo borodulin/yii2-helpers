@@ -57,7 +57,7 @@ trait CurlTrait
     /**
      * Error code
      * @see curl_errno
-     * @var unknown
+     * @var integer
      */
     protected $_errorCode;
     
@@ -98,7 +98,10 @@ trait CurlTrait
      */
     public function isHttpOK()
     {
-        return (strncmp($this->_info['http_code'],'2',1) == 0);
+        if(isset($this->_info['http_code']))
+            return (strncmp($this->_info['http_code'],'2',1) == 0);
+        else
+            return false;
     }
 
     /**
@@ -109,8 +112,12 @@ trait CurlTrait
      */
     public function getOptions()
     {
-        if(is_null($this->_options))
-            return $this->defaultOpts();
+        foreach ($this->defaultOpts() as $k => $v){
+            if(!isset($this->_options[$k]))
+                $this->_options[$k] = $v;
+        }
+        // !important see headerCallback() function
+        $this->_options[CURLOPT_HEADER] = false;
         return $this->_options;
     }
     
@@ -120,15 +127,11 @@ trait CurlTrait
      * @see curl_setopt_array
      * @param array $options
      */
-    public function setOptions($options)
-    {        
-        foreach ($this->defaultOpts() as $k => $v){
-            if(!isset($options[$k]))
-                $options[$k] = $v;
+    public function setOptions(array $options)
+    {
+        foreach ($options as $k => $v){
+            $this->_options[$k] = $v;
         }
-        // !important see headerCallback() function
-        $options[CURLOPT_HEADER] = false;
-        $this->_options = $options;
     }
     
     /**
