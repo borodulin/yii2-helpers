@@ -21,11 +21,11 @@ class Json extends \yii\helpers\BaseJson
     public static function encode($value, $options = 320)
     {
         if (is_array($value)) {
-        	array_walk_recursive($value, function(&$item){
-        		if(is_string($item) && (strpos($item,'js:')===0))
-        			$item = new JsExpression(substr($item,3));
-        	});
+            array_walk_recursive($value, function(&$item){
+                if(is_string($item) && (strpos($item,'js:')===0))
+                    $item = new JsExpression(substr($item,3));
+            });
         }
-    	return parent::encode($value, $options);
+        return parent::encode($value, $options);
     }
 }
