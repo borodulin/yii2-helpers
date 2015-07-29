@@ -15,9 +15,9 @@ class Array2Xml
 
     private static function toXml($array)
     {        
-        if(is_array($array)){
+        if (is_array($array)) {
             $xml='';
-            foreach($array as $key => $value) {
+            foreach ($array as $key => $value) {
                 if(is_numeric($key))
                     $key="element";                
                 if (is_array($value))

@@ -52,7 +52,7 @@ class Temporary
     public function dir()
     {
         $this->_name = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid($this->_prefix);
-        if(!mkdir($this->_name))
+        if (!mkdir($this->_name))
             throw new \Exception('Cannot create temporary directory');
         return $this;
     }
@@ -70,10 +70,11 @@ class Temporary
     
     public function clear()
     {
-        if(is_dir($this->_name))
+        if (is_dir($this->_name)) {
             static::rmDir($this->_name);
-        elseif(file_exists($this->_name))
+        } elseif (file_exists($this->_name)) {
             unlink($this->_name);
+        }
     }
     
     protected static function rmDir($dir)
@@ -82,17 +83,18 @@ class Temporary
 
         foreach ($files as $file) {
             $filename=$dir.DIRECTORY_SEPARATOR.$file;
-            if(is_dir($filename))
+            if (is_dir($filename)) {
                 static::rmDir($filename);
-            else
+            } else {
                 unlink($filename);
+            }
         }
         return rmdir($dir);
     }
 
     protected static function clearAll()
     {
-        foreach (self::$_temporaries as $temporary){
+        foreach (self::$_temporaries as $temporary) {
             $temporary->clear();
         }
     }

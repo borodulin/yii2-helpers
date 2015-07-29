@@ -83,8 +83,8 @@ class Ip
     
     public static function getLongIp()
     {
-        $ipAddress=self::getIpAddress();
-        if(self::validateIp($ipAddress))
+        $ipAddress = self::getIpAddress();
+        if (self::validateIp($ipAddress))
             return ip2long($ipAddress);
         else 
             return null;

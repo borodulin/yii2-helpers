@@ -31,8 +31,10 @@ class Curl extends \yii\base\Object
     public function __construct($url, $options = [], $postData = [])
     {
         $this->setOptions($options);
-        if(!empty($postData))
+        
+        if (!empty($postData))
             $this->setPostData($postData);
+        
         $this->setUrl($url);
     }
 
@@ -44,22 +46,22 @@ class Curl extends \yii\base\Object
      */
     public function execute($url = null, $postData = null)
     {
-        if(!is_null($url))
+        if (!is_null($url))
             $this->setUrl($url);
-        
-        if(!is_null($postData))
+
+        if (!is_null($postData))
             $this->setPostData($postData);
-    
+
         $this->curl_execute();
             
-        if($this->_errorCode)
+        if ($this->_errorCode) {
             return false;
-        else if(!$this->isHttpOK()){
+        } else if (!$this->isHttpOK()) {
             $this->_errorMessage = $this->getContent();
             return false;
+        } else {
+            return true;
         }
-        else
-            return true; 
     }
     
     /**

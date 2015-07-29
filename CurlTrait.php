@@ -14,17 +14,17 @@ namespace conquer\helpers;
 trait CurlTrait 
 {
     private function defaultOpts(){
-        return array(
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_AUTOREFERER => true,
-                CURLOPT_HEADER => false,
-                CURLOPT_HEADERFUNCTION => array($this, 'headerCallback'),
-                CURLOPT_MAXREDIRS => 5,
-                CURLOPT_CONNECTTIMEOUT => 30,
-                CURLOPT_SSL_VERIFYPEER => false,
-                CURLOPT_TIMEOUT => 30,
-        );
+        return [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_AUTOREFERER => true,
+            CURLOPT_HEADER => false,
+            CURLOPT_HEADERFUNCTION => array($this, 'headerCallback'),
+            CURLOPT_MAXREDIRS => 5,
+            CURLOPT_CONNECTTIMEOUT => 30,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_TIMEOUT => 30,
+        ];
     }
     
     /**
@@ -86,7 +86,7 @@ trait CurlTrait
      */
     public function getCookies()
     {
-        if(preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $this->header, $matches)){
+        if (preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $this->header, $matches)) {
             return implode('; ', $matches[1]);
         }
         return null;
@@ -98,7 +98,7 @@ trait CurlTrait
      */
     public function isHttpOK()
     {
-        if(isset($this->_info['http_code']))
+        if (isset($this->_info['http_code']))
             return (strncmp($this->_info['http_code'],'2',1) == 0);
         else
             return false;
@@ -112,8 +112,8 @@ trait CurlTrait
      */
     public function getOptions()
     {
-        foreach ($this->defaultOpts() as $k => $v){
-            if(!isset($this->_options[$k]))
+        foreach ($this->defaultOpts() as $k => $v) {
+            if (!isset($this->_options[$k]))
                 $this->_options[$k] = $v;
         }
         // !important see headerCallback() function
@@ -129,7 +129,7 @@ trait CurlTrait
      */
     public function setOptions(array $options)
     {
-        foreach ($options as $k => $v){
+        foreach ($options as $k => $v) {
             $this->_options[$k] = $v;
         }
     }
@@ -140,7 +140,7 @@ trait CurlTrait
      */
     public function setPostData($postData)
     {
-        if(empty($postData)){
+        if (empty($postData)) {
             unset($this->_options[CURLOPT_POST]);
             unset($this->_options[CURLOPT_POSTFIELDS]);
         } else {
@@ -194,7 +194,7 @@ trait CurlTrait
     
         $this->_info = curl_getinfo($ch);
     
-        if($this->_errorCode)
+        if ($this->_errorCode)
             $this->_errorMessage = curl_error($ch);
     
         curl_close($ch);         
@@ -208,7 +208,7 @@ trait CurlTrait
     {
         $nodes = array();
         /* @var $url CurlTrait */
-        foreach ($urls as $url){
+        foreach ($urls as $url) {
             $ch = curl_init();
             $nodes[] = ['ch'=>$ch, 'url'=>$url];
     
@@ -216,7 +216,7 @@ trait CurlTrait
         }
         
         $mh = curl_multi_init();
-        foreach ($nodes as $node){
+        foreach ($nodes as $node) {
             curl_multi_add_handle($mh, $node['ch']);
         }
         
@@ -224,9 +224,9 @@ trait CurlTrait
         do {
             curl_multi_exec($mh, $running);
             curl_multi_select($mh);
-        } while($running > 0);
+        } while ($running > 0);
     
-        foreach ($nodes as $node){
+        foreach ($nodes as $node) {
             /* @var $url Curl */
             $url = $node['url'];
     
@@ -242,7 +242,7 @@ trait CurlTrait
         }
         
         //close the handles
-        foreach ($nodes as $node){
+        foreach ($nodes as $node) {
             curl_multi_remove_handle($mh, $node['ch']);
         }
         curl_multi_close($mh);

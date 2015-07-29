@@ -24,9 +24,9 @@ class XPath
     public function __construct($content, $html=false)
     {
         $this->_doc=new \DOMDocument();
-        if($html)
+        if ($html) {
             @$this->_doc->loadHTML($content);
-        else{
+        } else {
             $this->_doc->loadXML($content);
         }
         $this->_xpath = new \DOMXpath($this->_doc);
@@ -34,7 +34,7 @@ class XPath
     
     public static function isAssociative($array)
     {
-        return !empty($array)&&(array_keys($array) !== range(0, count($array) - 1));
+        return !empty($array) && (array_keys($array) !== range(0, count($array) - 1));
     }
     
     /**
@@ -44,46 +44,46 @@ class XPath
      */
     public static function xmlToArray($elements)
     {
-        if($elements instanceof \DOMNodeList){
-            if($elements->length==0)
+        if ($elements instanceof \DOMNodeList) {
+            if ($elements->length == 0)
                 return null;
-            elseif($elements->length==1)
+            elseif ($elements->length == 1)
                 return self::xmlToArray($elements->item(0));
             else
             {
                 $result=array();
-                foreach ($elements as $element){
-                    $result[]=self::xmlToArray($element);
+                foreach ($elements as $element) {
+                    $result[] = self::xmlToArray($element);
                 }
                 return $result;
             }
         }
-        elseif($elements instanceof \DOMNode){
-            if($elements->hasChildNodes()){
-                $result=array();
-                foreach ($elements->childNodes as $element){
-                    if($element->nodeType!=3){
-                        if(isset($result[$element->nodeName])){
-                            if(is_array($result[$element->nodeName])&& !self::isAssociative($result[$element->nodeName]))
-                                $result[$element->nodeName][]=self::xmlToArray($element);
-                            else{
+        elseif ($elements instanceof \DOMNode) {
+            if ($elements->hasChildNodes()) {
+                $result = [];
+                foreach ($elements->childNodes as $element) {
+                    if ($element->nodeType != 3) {
+                        if (isset($result[$element->nodeName])) {
+                            if (is_array($result[$element->nodeName]) && !self::isAssociative($result[$element->nodeName])) {
+                                $result[$element->nodeName][] = self::xmlToArray($element);
+                            } else {
                                 $v=$result[$element->nodeName];
-                                $result[$element->nodeName]=array();
-                                $result[$element->nodeName][]=$v;
-                                $result[$element->nodeName][]=self::xmlToArray($element);
+                                $result[$element->nodeName] = [];
+                                $result[$element->nodeName][] = $v;
+                                $result[$element->nodeName][] = self::xmlToArray($element);
                             }
+                        } else {
+                            $result[$element->nodeName] = self::xmlToArray($element);
                         }
-                        else
-                            $result[$element->nodeName]=self::xmlToArray($element);
                         
                     }
                 }
-                if(count($result)==0)
+                if (count($result) == 0) {
                     return $elements->nodeValue;
-                else
+                } else {
                     return $result;
-            }
-            else{
+                }
+            } else {
                 return $elements->nodeValue;
             }
         }
@@ -98,13 +98,14 @@ class XPath
      */
     public function queryAll($paths, $contextNode=null, $assoc=true)
     {
-        $result=array();
-        foreach ($paths as $name=>$path){
+        $result = [];
+        foreach ($paths as $name=>$path) {
             $elements=$this->_xpath->query($path, $contextNode);
-            if($assoc)
-                $result[$name]=self::xmlToArray($elements);
-            else
-                $result[$name]=$elements;
+            if ($assoc) {
+                $result[$name] = self::xmlToArray($elements);
+            } else {
+                $result[$name] = $elements;
+            }
         }
         return $result;
     }
@@ -117,9 +118,9 @@ class XPath
      */
     public function query($path, $contextNode=null, $assoc=true)
     {
-        $elements=$this->_xpath->query($path,$contextNode);
-        if($elements->length>0){
-            if($assoc)
+        $elements = $this->_xpath->query($path,$contextNode);
+        if ($elements->length>0) {
+            if ($assoc)
                 return self::xmlToArray($elements);
             else
                 return $elements;
@@ -136,13 +137,14 @@ class XPath
      */
     public function queryOne($path, $contextNode=null, $assoc=true)
     {
-        $elements=$this->_xpath->query($path,$contextNode);
-        if($elements->length>0){
+        $elements = $this->_xpath->query($path,$contextNode);
+        if ($elements->length>0) {
             $el=$elements->item(0);
-            if($assoc)
+            if ($assoc) {
                 return self::xmlToArray($el);
-            else
+            } else {
                 return $el;
+            }
         }
         return null;
     }
@@ -153,9 +155,9 @@ class XPath
      */
     public function getNodePos($node)
     {
-        $prevSibling=$node->previousSibling;
+        $prevSibling = $node->previousSibling;
         $pos=1;
-        while(!empty($prevSibling)){
+        while (!empty($prevSibling)) {
             $prevSibling=$prevSibling->previousSibling;
             $pos++;
         }
@@ -171,14 +173,14 @@ class XPath
     public function findPos($path,$contextNode=null)
     {
         try {
-            $elements=$this->_xpath->query($path,$contextNode);
-            if($elements->length>0){
-                if($elements->length==1)
+            $elements = $this->_xpath->query($path,$contextNode);
+            if ($elements->length > 0) {
+                if ($elements->length == 1) {
                     return $this->getNodePos($elements->item(0));
-                else{
-                    $result=array();
-                    foreach ($elements as $element){
-                        $result[]=$this->getNodePos($element);
+                } else {
+                    $result = [];
+                    foreach ($elements as $element) {
+                        $result[] = $this->getNodePos($element);
                     }
                     return $result;
                 }
@@ -196,9 +198,9 @@ class XPath
      */
     public function findPosAll($paths,$contextNode=null)
     {
-        $result=array();
-        foreach ($paths as $key=>$path){
-            $result[$key]=$this->findPos($path, $contextNode);
+        $result = [];
+        foreach ($paths as $key => $path) {
+            $result[$key] = $this->findPos($path, $contextNode);
         }
         return $result; 
     }
@@ -211,13 +213,13 @@ class XPath
      */
     public function evalute($path, $contextNode=null)
     {
-        $entries=$this->_xpath->evaluate($path, $contextNode);
-        if(is_a($entries, 'DOMNodeList'))
-            if($entries->length>0)
+        $entries = $this->_xpath->evaluate($path, $contextNode);
+        if (is_a($entries, 'DOMNodeList'))
+            if ($entries->length>0)
                 return $entries->item(0)->nodeValue; 
             else
                 return null;
-        if($entries)
+        if ($entries)
             return $entries;
         else
             return null;
@@ -237,12 +239,12 @@ class XPath
      */
     public static function clearTextConcat($value)
     {
-        if(is_string($value))
+        if (is_string($value))
             return trim(preg_replace('/\s+/s', ' ', $value));
-        if(is_array($value)){
-            $result=array();
-            foreach ($value as $val){
-                $result[]=self::clearTextConcat($val);
+        if (is_array($value)) {
+            $result = [];
+            foreach ($value as $val) {
+                $result[] = self::clearTextConcat($val);
             }
             return implode(' ', array_filter($result, 'strlen'));
         }
@@ -254,10 +256,10 @@ class XPath
      */
     public static function clearText(&$value)
     {
-        if(is_string($value))
-            $value=trim(preg_replace('/\s+/s', ' ', $value));
-        if(is_array($value)){
-            foreach ($value as &$val){
+        if (is_string($value))
+            $value = trim(preg_replace('/\s+/s', ' ', $value));
+        if (is_array($value)) {
+            foreach ($value as &$val) {
                 self::clearText($val);
             }
         }
@@ -285,10 +287,10 @@ class XPath
      */
     public function updateOne($path, $value, $contextNode=null)
     {
-        $elements=$this->_xpath->query($path,$contextNode);
-        if($elements->length>0){
-            $el=$elements->item(0);
-            $el->nodeValue=$value;
+        $elements = $this->_xpath->query($path,$contextNode);
+        if ($elements->length>0) {
+            $el = $elements->item(0);
+            $el->nodeValue = $value;
             return true;
         }
         return false;
@@ -302,10 +304,10 @@ class XPath
      */
     public function update($path, $value, $contextNode=null)
     {
-        $elements=$this->_xpath->query($path,$contextNode);
-        if($elements->length>0){
-            foreach ($elements as $el){
-                $el->nodeValue=$value;
+        $elements = $this->_xpath->query($path,$contextNode);
+        if ($elements->length>0) {
+            foreach ($elements as $el) {
+                $el->nodeValue = $value;
             }
             return true;
         }
@@ -319,11 +321,11 @@ class XPath
     public function updateAll($paths, $contextNode=null)
     {
         $result=0;
-        foreach ($paths as $path=>$value){
-            $elements=$this->_xpath->query($path, $contextNode);
-            if($elements->length>0){
-                foreach ($elements as $el){
-                    $el->nodeValue=$value;
+        foreach ($paths as $path=>$value) {
+            $elements = $this->_xpath->query($path, $contextNode);
+            if ($elements->length>0) {
+                foreach ($elements as $el) {
+                    $el->nodeValue = $value;
                     $result++;
                 }
             }
