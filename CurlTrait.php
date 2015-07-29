@@ -258,7 +258,7 @@ trait CurlTrait
         return $this->_errorCode;
     }
     
-    public function getErorMessage()
+    public function getErrorMessage()
     {
         return $this->_errorMessage;
     }
