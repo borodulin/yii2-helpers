@@ -27,7 +27,7 @@ trait CurlTrait
             CURLOPT_TIMEOUT => 30,
         ];
         if ($this->_autoCookie) {
-            if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
+            if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
                 $options[CURLOPT_COOKIEJAR] = 'NUL';
             } else {
                 $options[CURLOPT_COOKIEJAR] = '/dev/null';
@@ -286,5 +286,15 @@ trait CurlTrait
     public function getInfo()
     {
         return $this->_info;
+    }
+    
+    public function getAutoCookie()
+    {
+        return $this->_autoCookie;
+    }
+    
+    public function setAutoCookie($value)
+    {
+        $this->_autoCookie = $value;
     }
 }

@@ -16,6 +16,7 @@ namespace conquer\helpers;
  * @property string $errorMessage
  * @property string $cookies
  * @property array $info
+ * @property boolean $autoCookie
  * 
  * @author Andrey Borodulin
  */
