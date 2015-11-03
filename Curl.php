@@ -74,5 +74,4 @@ class Curl extends \yii\base\Object
     {
         static::curl_multi_exec($urls);
     }
-    
 }
