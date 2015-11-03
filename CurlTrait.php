@@ -13,8 +13,9 @@ namespace conquer\helpers;
  */
 trait CurlTrait 
 {
-    private function defaultOpts(){
-        return [
+    private function defaultOpts()
+    {
+        $options = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_AUTOREFERER => true,
@@ -25,6 +26,14 @@ trait CurlTrait
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_TIMEOUT => 30,
         ];
+        if ($this->_autoCookie) {
+            if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
+                $options[CURLOPT_COOKIEJAR] = 'NUL';
+            } else {
+                $options[CURLOPT_COOKIEJAR] = '/dev/null';
+            }
+        }
+        return $options;
     }
     
     /**
@@ -46,7 +55,7 @@ trait CurlTrait
      * @see curl_exec
      * @var string
      */
-    protected  $_content;
+    protected $_content;
     
     /**
      * @see curl_getinfo
@@ -67,6 +76,15 @@ trait CurlTrait
      * @var string
      */
     protected $_errorMessage;
+    
+    /**
+     * Use /dev/null as a cookie storage.
+     * This will prevent the cookies from being written to disk, 
+     * but it will keep them around in memory as long as you reuse the handle and don't call curl_easy_cleanup()
+     * @link http://stackoverflow.com/questions/1486099/any-way-to-keep-curls-cookies-in-memory-and-not-on-disk
+     * @var boolean
+     */
+    protected $_autoCookie = false;
     
     /**
      * @see CURLOPT_HEADERFUNCTION
@@ -98,10 +116,11 @@ trait CurlTrait
      */
     public function isHttpOK()
     {
-        if (isset($this->_info['http_code']))
-            return (strncmp($this->_info['http_code'],'2',1) == 0);
-        else
+        if (isset($this->_info['http_code'])) {
+            return (strncmp($this->_info['http_code'], '2', 1) == 0);
+        } else {
             return false;
+        }
     }
 
     /**
@@ -113,8 +132,9 @@ trait CurlTrait
     public function getOptions()
     {
         foreach ($this->defaultOpts() as $k => $v) {
-            if (!isset($this->_options[$k]))
+            if (!isset($this->_options[$k])) {
                 $this->_options[$k] = $v;
+            }
         }
         // !important see headerCallback() function
         $this->_options[CURLOPT_HEADER] = false;
@@ -194,9 +214,9 @@ trait CurlTrait
     
         $this->_info = curl_getinfo($ch);
     
-        if ($this->_errorCode)
+        if ($this->_errorCode) {
             $this->_errorMessage = curl_error($ch);
-    
+        }
         curl_close($ch);         
     }
     
@@ -206,11 +226,11 @@ trait CurlTrait
      */
     protected static function curl_multi_exec($urls)
     {
-        $nodes = array();
+        $nodes = [];
         /* @var $url CurlTrait */
         foreach ($urls as $url) {
             $ch = curl_init();
-            $nodes[] = ['ch'=>$ch, 'url'=>$url];
+            $nodes[] = ['ch' => $ch, 'url' => $url];
     
             curl_setopt_array($ch, $url->getOptions());
         }
@@ -235,9 +255,9 @@ trait CurlTrait
             $url->_content = curl_multi_getcontent($ch);
             
             $url->_errorCode = curl_errno($ch);
-            if(!empty($url->_errorCode))
+            if (!empty($url->_errorCode)) {
                 $url->_errorMessage = curl_error($ch);
-
+            }
             $url->_info = curl_getinfo($ch);
         }
         
@@ -267,5 +287,4 @@ trait CurlTrait
     {
         return $this->_info;
     }
-    
 }

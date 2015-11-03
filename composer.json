@@ -5,16 +5,19 @@
     "homepage": "https://github.com/borodulin/yii2-helpers",
     "type": "yii2-extension",
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/borodulin/yii2-helpers/issues",
+        "source": "https://github.com/borodulin/yii2-helpers"
+    },
     "authors": [
         {
             "name": "Andrey Borodulin",
-            "email": "borodulin@gmail.com",
-            "homepage": "https://github.com/borodulin/yii2-helpers"
+            "email": "borodulin@gmail.com"
         }
     ],
     "extra": {
         "branch-alias": {
-          "dev-master": "2.0.8.x-dev"
+          "dev-master": "2.0.9.x-dev"
         }
       },
     "require": {

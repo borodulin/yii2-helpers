@@ -32,9 +32,9 @@ class Curl extends \yii\base\Object
     {
         $this->setOptions($options);
         
-        if (!empty($postData))
+        if (!empty($postData)) {
             $this->setPostData($postData);
-        
+        }
         $this->setUrl($url);
     }
 
@@ -46,12 +46,13 @@ class Curl extends \yii\base\Object
      */
     public function execute($url = null, $postData = null)
     {
-        if (!is_null($url))
+        if (!is_null($url)) {
             $this->setUrl($url);
-
-        if (!is_null($postData))
+        }
+        if (!is_null($postData)) {
             $this->setPostData($postData);
-
+        }
+        
         $this->curl_execute();
             
         if ($this->_errorCode) {
