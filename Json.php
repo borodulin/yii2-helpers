@@ -22,8 +22,8 @@ class Json extends \yii\helpers\BaseJson
     {
         if (is_array($value)) {
             array_walk_recursive($value, function(&$item) {
-                if (is_string($item) && (strpos($item,'js:')===0)) {
-                    $item = new JsExpression(substr($item,3));
+                if (is_string($item) && (strncasecmp($item, 'js:', 3) === 0)) {
+                    $item = new JsExpression(substr($item, 3));
                 }
             });
         }

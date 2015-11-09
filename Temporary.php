@@ -16,7 +16,7 @@ class Temporary
      * 
      * @var Temporary[]
      */
-    private static $_temporaries=[];
+    private static $_temporaries = [];
 
     private $_name;
     
@@ -26,14 +26,14 @@ class Temporary
      * 
      * @param string $prefix
      */
-    public function __construct($prefix='')
+    public function __construct($prefix = '')
     {
         $this->_prefix = $prefix;
         self::$_temporaries[] = $this;
         
         static $registered = false;
-        if(!$registered){
-            register_shutdown_function(get_class($this).'::clearAll');
+        if (!$registered) {
+            register_shutdown_function(get_class($this) . '::clearAll');
             $registered = true;            
         }
     }
@@ -51,9 +51,10 @@ class Temporary
      */
     public function dir()
     {
-        $this->_name = sys_get_temp_dir().DIRECTORY_SEPARATOR.uniqid($this->_prefix);
-        if (!mkdir($this->_name))
+        $this->_name = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid($this->_prefix);
+        if (!mkdir($this->_name)) {
             throw new \Exception('Cannot create temporary directory');
+        }
         return $this;
     }
     
@@ -79,10 +80,10 @@ class Temporary
     
     protected static function rmDir($dir)
     {
-        $files = array_diff(scandir($dir), ['.','..']);
+        $files = array_diff(scandir($dir), ['.', '..']);
 
         foreach ($files as $file) {
-            $filename=$dir.DIRECTORY_SEPARATOR.$file;
+            $filename = $dir . DIRECTORY_SEPARATOR . $file;
             if (is_dir($filename)) {
                 static::rmDir($filename);
             } else {
