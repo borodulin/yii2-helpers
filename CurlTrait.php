@@ -105,7 +105,7 @@ trait CurlTrait
     public function getCookies()
     {
         if (preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $this->header, $matches)) {
-            return implode('; ', $matches[1]);
+            return implode('; ', array_unique($matches[1]));
         }
         return null;
     }
@@ -117,7 +117,7 @@ trait CurlTrait
     public function isHttpOK()
     {
         if (isset($this->_info['http_code'])) {
-            return (strncmp($this->_info['http_code'], '2', 1) == 0);
+            return (strncmp($this->_info['http_code'], '2', 1) === 0);
         } else {
             return false;
         }
