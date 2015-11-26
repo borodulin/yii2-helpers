@@ -65,7 +65,7 @@ class Temporary
      */
     public function file()
     {
-        $this->_name = tempnam(sys_get_temp_dir(), $prefix);
+        $this->_name = tempnam(sys_get_temp_dir(), $this->_prefix);
         return $this;
     }
     
