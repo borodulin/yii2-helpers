@@ -93,7 +93,7 @@ class Temporary
         return rmdir($dir);
     }
 
-    protected static function clearAll()
+    public static function clearAll()
     {
         foreach (self::$_temporaries as $temporary) {
             $temporary->clear();
