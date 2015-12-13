@@ -160,7 +160,7 @@ trait CurlTrait
      */
     public function setPostData($postData)
     {
-        if (empty($postData)) {
+        if (is_null($postData)) {
             unset($this->_options[CURLOPT_POST]);
             unset($this->_options[CURLOPT_POSTFIELDS]);
         } else {
