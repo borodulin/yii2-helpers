@@ -158,10 +158,22 @@ trait CurlTrait
     
     /**
      * Resets all options to defaults
+     * @return static
      */
     public function resetOptions()
     {
         $this->_options = [];
+        return $this;
+    }
+    
+    /**
+     * 
+     * @param string $header
+     * @return static
+     */
+    public function addHttpHeader($header)
+    {
+        $this->_options[CURLOPT_HTTPHEADER][] = $header;
         return $this;
     }
     
