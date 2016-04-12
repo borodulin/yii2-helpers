@@ -146,17 +146,29 @@ trait CurlTrait
      * Warning! setoptions clears all previously setted options and post data
      * @see curl_setopt_array
      * @param array $options
+     * @return static
      */
     public function setOptions(array $options)
     {
         foreach ($options as $k => $v) {
             $this->_options[$k] = $v;
         }
+        return $this;
+    }
+    
+    /**
+     * Resets all options to defaults
+     */
+    public function resetOptions()
+    {
+        $this->_options = [];
+        return $this;
     }
     
     /**
      * Adds post data to options 
      * @param mixed $postData
+     * @return $this;
      */
     public function setPostData($postData)
     {
@@ -167,6 +179,7 @@ trait CurlTrait
             $this->_options[CURLOPT_POST] = true;
             $this->_options[CURLOPT_POSTFIELDS] = $postData;
         }
+        return $this;
     }
     
     /**
@@ -192,10 +205,12 @@ trait CurlTrait
      * Url setter
      * @see CURLOPT_URL
      * @param string $url
+     * @return static
      */
     public function setUrl($url)
     {
         $this->_options[CURLOPT_URL] = $url;
+        return $this;
     }
     
     /**
@@ -296,5 +311,6 @@ trait CurlTrait
     public function setAutoCookie($value)
     {
         $this->_autoCookie = $value;
+        return $this;
     }
 }

@@ -212,12 +212,13 @@ class XPath
     public function evalute($path, $contextNode = null)
     {
         $entries = $this->_xpath->evaluate($path, $contextNode);
-        if (is_a($entries, 'DOMNodeList'))
+        if (is_a($entries, 'DOMNodeList')) {
             if ($entries->length > 0) {
                 return $entries->item(0)->nodeValue; 
             } else {
                 return null;
             }
+        }
         return $entries ?: null;
     }
     
