@@ -9,7 +9,7 @@ namespace conquer\helpers;
 
 /**
  * @property string $url
- * @property string $header   
+ * @property string $header
  * @property array $options
  * @property string $content
  * @property integer $errorCode
@@ -17,12 +17,12 @@ namespace conquer\helpers;
  * @property string $cookies
  * @property array $info
  * @property boolean $autoCookie
- * 
+ *
  * @author Andrey Borodulin
  */
 class Curl extends \yii\base\Object
 {
-   use CurlTrait;
+    use CurlTrait;
 
     /**
      * @param string $url
@@ -32,7 +32,7 @@ class Curl extends \yii\base\Object
     public function __construct($url, $options = [], $postData = [])
     {
         $this->setOptions($options);
-        
+
         if (!empty($postData)) {
             $this->setPostData($postData);
         }
@@ -53,9 +53,9 @@ class Curl extends \yii\base\Object
         if (!is_null($postData)) {
             $this->setPostData($postData);
         }
-        
+
         $this->curl_execute();
-            
+
         if ($this->_errorCode) {
             return false;
         } else if (!$this->isHttpOK()) {
@@ -65,7 +65,7 @@ class Curl extends \yii\base\Object
             return true;
         }
     }
-    
+
     /**
      * Executes parallels curls
      * @param Curl[] $urls

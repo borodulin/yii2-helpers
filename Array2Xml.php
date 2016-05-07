@@ -13,7 +13,7 @@ namespace conquer\helpers;
 class Array2Xml
 {
     private static function toXml($array)
-    {        
+    {
         if (is_array($array)) {
             $xml = '';
             foreach ($array as $key => $value) {
@@ -28,11 +28,12 @@ class Array2Xml
                     $xml .= "<$key>" . htmlspecialchars($value) . "</$key>";
                 }
             }
-        } else {        
+        } else {
             $xml = "<$key>" . htmlspecialchars($value) . "</$key>";
         }
         return $xml;
     }
+
     /**
      * Converts PHP array to xml.
      * @param array $array

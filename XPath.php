@@ -8,16 +8,16 @@
 namespace conquer\helpers;
 
 /**
- * 
+ *
  * @author Andrey Borodulin
  */
 class XPath
 {
     private $_doc;
     private $_xpath;
-    
+
     /**
-     * 
+     *
      * @param string $content
      * @param boolean $html Parse text as html
      */
@@ -31,14 +31,14 @@ class XPath
         }
         $this->_xpath = new \DOMXpath($this->_doc);
     }
-    
+
     public static function isAssociative($array)
     {
         return !empty($array) && (array_keys($array) !== range(0, count($array) - 1));
     }
-    
+
     /**
-     * 
+     *
      * @param \DOMNodeList $elements
      * @return mixed|NULL
      */
@@ -84,10 +84,10 @@ class XPath
                 return $elements->nodeValue;
             }
         }
-    } 
-    
+    }
+
     /**
-     * 
+     *
      * @param array $paths
      * @param \DOMNode $contextNode
      * @param boolean $assoc
@@ -106,8 +106,9 @@ class XPath
         }
         return $result;
     }
+
     /**
-     * 
+     *
      * @param string $path
      * @param \DOMNode $contextNode
      * @param boolean $assoc
@@ -127,7 +128,7 @@ class XPath
     }
 
     /**
-     * 
+     *
      * @param string $path
      * @param \DOMNode $contextNode
      * @param boolean $assoc
@@ -146,8 +147,9 @@ class XPath
         }
         return null;
     }
+
     /**
-     * 
+     *
      * @param \DOMNode $node
      * @return integer
      */
@@ -160,12 +162,13 @@ class XPath
             $pos++;
         }
         return $pos;
-    } 
+    }
+
     /**
-     * 
+     *
      * @param string $path XPath
      * @param \DOMNode $contextNode
-     * @throws CException
+     * @throws Exception
      * @return integer|NULL
      */
     public function findPos($path, $contextNode = null)
@@ -188,8 +191,9 @@ class XPath
             throw new \Exception($e->getMessage() . ' : ' . $path);
         }
     }
+
     /**
-     * 
+     *
      * @param array $paths
      * @param \DOMNode $contextNode
      * @return array
@@ -202,9 +206,9 @@ class XPath
         }
         return $result;
     }
-    
+
     /**
-     * 
+     *
      * @param string $path
      * @param \DOMNode $contextNode
      * @return NULL|mixed
@@ -214,14 +218,14 @@ class XPath
         $entries = $this->_xpath->evaluate($path, $contextNode);
         if (is_a($entries, 'DOMNodeList')) {
             if ($entries->length > 0) {
-                return $entries->item(0)->nodeValue; 
+                return $entries->item(0)->nodeValue;
             } else {
                 return null;
             }
         }
         return $entries ?: null;
     }
-    
+
     /**
      * @return \DOMXpath
      */
@@ -229,6 +233,7 @@ class XPath
     {
         return $this->_xpath;
     }
+
     /**
      * Recursive clears all text in array
      * @param string $value
@@ -248,6 +253,7 @@ class XPath
         }
         return null;
     }
+
     /**
      * Clears text
      * @param string $value
@@ -263,22 +269,23 @@ class XPath
             }
         }
     }
-    
+
     /**
-     * 
+     *
      * @return \DOMDocument
      */
     public function getDoc()
     {
         return $this->_doc;
     }
-    
+
     public function registerNamespace($prefix, $namespaceURI)
     {
         $this->_xpath->registerNamespace($prefix, $namespaceURI);
     }
+
     /**
-     * 
+     *
      * @param string $path
      * @param string $value
      * @param \DOMNode $contextNode
@@ -294,8 +301,9 @@ class XPath
         }
         return false;
     }
+
     /**
-     * 
+     *
      * @param string $path
      * @param string $value
      * @param \DOMNode $contextNode
@@ -312,8 +320,9 @@ class XPath
         }
         return false;
     }
+
     /**
-     * 
+     *
      * @param array $paths [XPath => Value]
      * @param string $contextNode
      * @return integer

@@ -8,10 +8,10 @@
 namespace conquer\helpers;
 
 /**
- * 
+ *
  * @author Andrey Borodulin
  */
-trait CurlTrait 
+trait CurlTrait
 {
     private function defaultOpts()
     {
@@ -35,7 +35,7 @@ trait CurlTrait
         }
         return $options;
     }
-    
+
     /**
      * CURL Options
      * @see curl_setopt_array
@@ -56,36 +56,36 @@ trait CurlTrait
      * @var string
      */
     protected $_content;
-    
+
     /**
      * @see curl_getinfo
      * @var array
      */
     protected $_info;
-    
+
     /**
      * Error code
      * @see curl_errno
      * @var integer
      */
     protected $_errorCode;
-    
+
     /**
      * Error message
      * @see curl_error
      * @var string
      */
     protected $_errorMessage;
-    
+
     /**
      * Use /dev/null as a cookie storage.
-     * This will prevent the cookies from being written to disk, 
+     * This will prevent the cookies from being written to disk,
      * but it will keep them around in memory as long as you reuse the handle and don't call curl_easy_cleanup()
      * @link http://stackoverflow.com/questions/1486099/any-way-to-keep-curls-cookies-in-memory-and-not-on-disk
      * @var boolean
      */
     protected $_autoCookie = false;
-    
+
     /**
      * @see CURLOPT_HEADERFUNCTION
      * @param resource $ch
@@ -97,7 +97,7 @@ trait CurlTrait
         $this->_header .= $headerLine;
         return strlen($headerLine);
     }
-    
+
     /**
      * Returns the cookies of executed request
      * @return string|NULL
@@ -109,7 +109,7 @@ trait CurlTrait
         }
         return null;
     }
-    
+
     /**
      * Checks if it is good http code
      * @return boolean
@@ -140,7 +140,7 @@ trait CurlTrait
         $this->_options[CURLOPT_HEADER] = false;
         return $this->_options;
     }
-    
+
     /**
      * Setter for CURL Options
      * Warning! setoptions clears all previously setted options and post data
@@ -155,7 +155,7 @@ trait CurlTrait
         }
         return $this;
     }
-    
+
     /**
      * Resets all options to defaults
      * @return static
@@ -165,9 +165,9 @@ trait CurlTrait
         $this->_options = [];
         return $this;
     }
-    
+
     /**
-     * 
+     *
      * @param string $header
      * @return static
      */
@@ -176,9 +176,9 @@ trait CurlTrait
         $this->_options[CURLOPT_HTTPHEADER][] = $header;
         return $this;
     }
-    
+
     /**
-     * Adds post data to options 
+     * Adds post data to options
      * @param mixed $postData
      * @return $this;
      */
@@ -193,9 +193,9 @@ trait CurlTrait
         }
         return $this;
     }
-    
+
     /**
-     * 
+     *
      * @return string
      */
     public function getHeader()
@@ -210,9 +210,9 @@ trait CurlTrait
      */
     public function getUrl()
     {
-        return isset($this->_options[CURLOPT_URL]) ? $this->_options[CURLOPT_URL] : null; 
+        return isset($this->_options[CURLOPT_URL]) ? $this->_options[CURLOPT_URL] : null;
     }
-    
+
     /**
      * Url setter
      * @see CURLOPT_URL
@@ -224,7 +224,7 @@ trait CurlTrait
         $this->_options[CURLOPT_URL] = $url;
         return $this;
     }
-    
+
     /**
      * Executes the single curl
      * @return boolean
@@ -232,21 +232,21 @@ trait CurlTrait
     protected function curl_execute()
     {
         $ch = curl_init();
-    
+
         curl_setopt_array($ch, $this->getOptions());
-    
+
         $this->_content = curl_exec($ch);
-    
+
         $this->_errorCode = curl_errno($ch);
-    
+
         $this->_info = curl_getinfo($ch);
-    
+
         if ($this->_errorCode) {
             $this->_errorMessage = curl_error($ch);
         }
-        curl_close($ch);         
+        curl_close($ch);
     }
-    
+
     /**
      * Executes parallels curls
      * @param CurlTrait[] $urls
@@ -258,68 +258,68 @@ trait CurlTrait
         foreach ($urls as $url) {
             $ch = curl_init();
             $nodes[] = ['ch' => $ch, 'url' => $url];
-    
+
             curl_setopt_array($ch, $url->getOptions());
         }
-        
+
         $mh = curl_multi_init();
         foreach ($nodes as $node) {
             curl_multi_add_handle($mh, $node['ch']);
         }
-        
+
         //execute the handles
         do {
             curl_multi_exec($mh, $running);
             curl_multi_select($mh);
         } while ($running > 0);
-    
+
         foreach ($nodes as $node) {
             /* @var $url Curl */
             $url = $node['url'];
-    
+
             $ch = $node['ch'];
-    
+
             $url->_content = curl_multi_getcontent($ch);
-            
+
             $url->_errorCode = curl_errno($ch);
             if (!empty($url->_errorCode)) {
                 $url->_errorMessage = curl_error($ch);
             }
             $url->_info = curl_getinfo($ch);
         }
-        
+
         //close the handles
         foreach ($nodes as $node) {
             curl_multi_remove_handle($mh, $node['ch']);
         }
         curl_multi_close($mh);
     }
-    
+
     public function getContent()
     {
         return $this->_content;
     }
-    
+
     public function getErrorCode()
     {
         return $this->_errorCode;
     }
-    
+
     public function getErrorMessage()
     {
         return $this->_errorMessage;
     }
-    
+
     public function getInfo()
     {
         return $this->_info;
     }
-    
+
     public function getAutoCookie()
     {
         return $this->_autoCookie;
     }
-    
+
     public function setAutoCookie($value)
     {
         $this->_autoCookie = $value;

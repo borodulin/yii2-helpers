@@ -7,37 +7,37 @@
 
 namespace conquer\helpers;
 /**
- * 
+ *
  * @author Andrey Borodulin
  */
 class Temporary
 {
     /**
-     * 
+     *
      * @var Temporary[]
      */
     private static $_temporaries = [];
 
     private $_name;
-    
+
     private $_prefix;
-    
+
     /**
-     * 
+     *
      * @param string $prefix
      */
     public function __construct($prefix = '')
     {
         $this->_prefix = $prefix;
         self::$_temporaries[] = $this;
-        
+
         static $registered = false;
         if (!$registered) {
             register_shutdown_function(get_class($this) . '::clearAll');
-            $registered = true;            
+            $registered = true;
         }
     }
-    
+
     public function __toString()
     {
         return $this->_name;
@@ -45,7 +45,7 @@ class Temporary
 
     /**
      * Creates temporary directory
-     * 
+     *
      * @throws \Exception
      * @return Temporary
      */
@@ -57,10 +57,10 @@ class Temporary
         }
         return $this;
     }
-    
+
     /**
      * Creates temporary file
-     * 
+     *
      * @return Temporary
      */
     public function file()
@@ -68,7 +68,7 @@ class Temporary
         $this->_name = tempnam(sys_get_temp_dir(), $this->_prefix);
         return $this;
     }
-    
+
     public function clear()
     {
         if (is_dir($this->_name)) {
@@ -77,7 +77,7 @@ class Temporary
             unlink($this->_name);
         }
     }
-    
+
     protected static function rmDir($dir)
     {
         $files = array_diff(scandir($dir), ['.', '..']);

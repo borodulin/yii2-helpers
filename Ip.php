@@ -7,7 +7,7 @@
 
 namespace conquer\helpers;
 /**
- * 
+ *
  * @link http://stackoverflow.com/questions/15699101/get-the-client-ip-address-using-php
  */
 class Ip
@@ -23,7 +23,7 @@ class Ip
         if (isset($_SERVER['HTTP_CLIENT_IP']) && self::validateIp($_SERVER['HTTP_CLIENT_IP'])) {
             return $_SERVER['HTTP_CLIENT_IP'];
         }
-    
+
         // check for IPs passing through proxies
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             // check if multiple ips exist in var
@@ -53,9 +53,9 @@ class Ip
             return $_SERVER['HTTP_FORWARDED'];
         }
         // return unreliable ip since all else failed
-        return isset($_SERVER['REMOTE_ADDR'])?$_SERVER['REMOTE_ADDR']:'unknown';
+        return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
     }
-    
+
     /**
      * Ensures an ip address is both a valid IP and does not fall within
      * a private network range.
@@ -67,7 +67,7 @@ class Ip
         }
         // generate ipv4 network address
         $ip = ip2long($ip);
-    
+
         // if the ip is set and not equivalent to 255.255.255.255
         if (($ip !== false) && ($ip !== -1)) {
             // make sure to get unsigned long representation of ip
@@ -102,14 +102,14 @@ class Ip
         }
         return true;
     }
-    
-    
+
+
     public static function getLongIp()
     {
         $ipAddress = self::getIpAddress();
         if (self::validateIp($ipAddress)) {
             return ip2long($ipAddress);
-        } else { 
+        } else {
             return null;
         }
     }
