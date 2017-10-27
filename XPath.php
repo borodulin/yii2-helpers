@@ -7,6 +7,12 @@
 
 namespace conquer\helpers;
 
+use DOMDocument;
+use DOMNode;
+use DOMNodeList;
+use DOMXpath;
+use Exception;
+
 /**
  *
  * @author Andrey Borodulin
@@ -23,13 +29,13 @@ class XPath
      */
     public function __construct($content, $html = false)
     {
-        $this->_doc = new \DOMDocument();
+        $this->_doc = new DOMDocument();
         if ($html) {
             @$this->_doc->loadHTML($content);
         } else {
             $this->_doc->loadXML($content);
         }
-        $this->_xpath = new \DOMXpath($this->_doc);
+        $this->_xpath = new DOMXpath($this->_doc);
     }
 
     public static function isAssociative($array)
@@ -39,12 +45,12 @@ class XPath
 
     /**
      *
-     * @param \DOMNodeList $elements
+     * @param DOMNodeList $elements
      * @return mixed|NULL
      */
     public static function xmlToArray($elements)
     {
-        if ($elements instanceof \DOMNodeList) {
+        if ($elements instanceof DOMNodeList) {
             if ($elements->length == 0) {
                 return null;
             } elseif ($elements->length == 1) {
@@ -56,7 +62,7 @@ class XPath
                 }
                 return $result;
             }
-        } elseif ($elements instanceof \DOMNode) {
+        } elseif ($elements instanceof DOMNode) {
             if ($elements->hasChildNodes()) {
                 $result = [];
                 foreach ($elements->childNodes as $element) {
@@ -84,12 +90,13 @@ class XPath
                 return $elements->nodeValue;
             }
         }
+        return [];
     }
 
     /**
      *
      * @param array $paths
-     * @param \DOMNode $contextNode
+     * @param DOMNode $contextNode
      * @param boolean $assoc
      * @return array
      */
@@ -110,9 +117,9 @@ class XPath
     /**
      *
      * @param string $path
-     * @param \DOMNode $contextNode
+     * @param DOMNode $contextNode
      * @param boolean $assoc
-     * @return array|\DOMNodeList|NULL
+     * @return array|DOMNodeList|NULL
      */
     public function query($path, $contextNode = null, $assoc = true)
     {
@@ -130,9 +137,9 @@ class XPath
     /**
      *
      * @param string $path
-     * @param \DOMNode $contextNode
+     * @param DOMNode $contextNode
      * @param boolean $assoc
-     * @return array|\DOMNode|NULL
+     * @return array|DOMNode|NULL
      */
     public function queryOne($path, $contextNode = null, $assoc = true)
     {
@@ -150,7 +157,7 @@ class XPath
 
     /**
      *
-     * @param \DOMNode $node
+     * @param DOMNode $node
      * @return integer
      */
     public function getNodePos($node)
@@ -167,7 +174,7 @@ class XPath
     /**
      *
      * @param string $path XPath
-     * @param \DOMNode $contextNode
+     * @param DOMNode $contextNode
      * @throws Exception
      * @return integer|NULL
      */
@@ -187,15 +194,15 @@ class XPath
                 }
             }
             return null;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage() . ' : ' . $path);
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage() . ' : ' . $path);
         }
     }
 
     /**
      *
      * @param array $paths
-     * @param \DOMNode $contextNode
+     * @param DOMNode $contextNode
      * @return array
      */
     public function findPosAll($paths, $contextNode = null)
@@ -210,7 +217,7 @@ class XPath
     /**
      *
      * @param string $path
-     * @param \DOMNode $contextNode
+     * @param DOMNode $contextNode
      * @return NULL|mixed
      */
     public function evalute($path, $contextNode = null)
@@ -227,7 +234,7 @@ class XPath
     }
 
     /**
-     * @return \DOMXpath
+     * @return DOMXpath
      */
     public function getXPath()
     {
@@ -272,7 +279,7 @@ class XPath
 
     /**
      *
-     * @return \DOMDocument
+     * @return DOMDocument
      */
     public function getDoc()
     {
@@ -288,7 +295,7 @@ class XPath
      *
      * @param string $path
      * @param string $value
-     * @param \DOMNode $contextNode
+     * @param DOMNode $contextNode
      * @return boolean
      */
     public function updateOne($path, $value, $contextNode = null)
@@ -306,7 +313,7 @@ class XPath
      *
      * @param string $path
      * @param string $value
-     * @param \DOMNode $contextNode
+     * @param DOMNode $contextNode
      * @return boolean
      */
     public function update($path, $value, $contextNode = null)

@@ -14,22 +14,20 @@ class Array2Xml
 {
     private static function toXml($array)
     {
+        $xml = '';
         if (is_array($array)) {
-            $xml = '';
             foreach ($array as $key => $value) {
                 if (is_numeric($key)) {
                     $key = "element";
                 }
                 if (is_array($value)) {
                     $xml .= "<$key>" . static::toXml($value) . "</$key>";
-                } elseif (strlen(trim($value)) == 0) {
+                } elseif (strlen(trim($value)) === 0) {
                     $xml .= "<$key/>";
                 } else {
                     $xml .= "<$key>" . htmlspecialchars($value) . "</$key>";
                 }
             }
-        } else {
-            $xml = "<$key>" . htmlspecialchars($value) . "</$key>";
         }
         return $xml;
     }

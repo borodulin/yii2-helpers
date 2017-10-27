@@ -7,6 +7,8 @@
 
 namespace conquer\helpers;
 
+use yii\base\Object;
+
 /**
  * @property string $url
  * @property string $header
@@ -20,7 +22,7 @@ namespace conquer\helpers;
  *
  * @author Andrey Borodulin
  */
-class Curl extends \yii\base\Object
+class Curl extends Object
 {
     use CurlTrait;
 
@@ -37,6 +39,7 @@ class Curl extends \yii\base\Object
             $this->setPostData($postData);
         }
         $this->setUrl($url);
+        parent::__construct([]);
     }
 
     /**

@@ -59,6 +59,8 @@ class Ip
     /**
      * Ensures an ip address is both a valid IP and does not fall within
      * a private network range.
+     * @param $ip
+     * @return bool
      */
     public static function validateIp($ip)
     {

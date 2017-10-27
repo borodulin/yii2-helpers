@@ -207,6 +207,7 @@ trait CurlTrait
      * Url getter
      * @see CURLOPT_URL
      * @var string
+     * @return null
      */
     public function getUrl()
     {
@@ -245,6 +246,7 @@ trait CurlTrait
             $this->_errorMessage = curl_error($ch);
         }
         curl_close($ch);
+        return $this->isHttpOK();
     }
 
     /**
