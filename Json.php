@@ -12,6 +12,8 @@ use yii\web\JsExpression;
 
 /**
  * Gives ability to using js: prefix
+ * Class Json
+ * @package conquer\helpers
  * @author Andrey Borodulin
  */
 class Json extends BaseJson

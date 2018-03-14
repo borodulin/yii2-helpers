@@ -7,9 +7,12 @@
 
 namespace conquer\helpers;
 
-use yii\base\Object;
+use yii\base\Component;
 
 /**
+ * Class Curl
+ * @package conquer\helpers
+ *
  * @property string $url
  * @property string $header
  * @property array $options
@@ -22,7 +25,7 @@ use yii\base\Object;
  *
  * @author Andrey Borodulin
  */
-class Curl extends Object
+class Curl extends Component
 {
     use CurlTrait;
 

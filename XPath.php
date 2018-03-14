@@ -14,7 +14,8 @@ use DOMXpath;
 use Exception;
 
 /**
- *
+ * Class XPath
+ * @package conquer\helpers
  * @author Andrey Borodulin
  */
 class XPath
@@ -45,7 +46,7 @@ class XPath
 
     /**
      *
-     * @param DOMNodeList $elements
+     * @param DOMNodeList|DOMNode $elements
      * @return mixed|NULL
      */
     public static function xmlToArray($elements)
@@ -176,7 +177,7 @@ class XPath
      * @param string $path XPath
      * @param DOMNode $contextNode
      * @throws Exception
-     * @return integer|NULL
+     * @return integer|NULL|array
      */
     public function findPos($path, $contextNode = null)
     {
@@ -204,6 +205,7 @@ class XPath
      * @param array $paths
      * @param DOMNode $contextNode
      * @return array
+     * @throws Exception
      */
     public function findPosAll($paths, $contextNode = null)
     {

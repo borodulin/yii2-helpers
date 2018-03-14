@@ -7,7 +7,8 @@
 
 namespace conquer\helpers;
 /**
- *
+ * Class Temporary
+ * @package conquer\helpers
  * @author Andrey Borodulin
  */
 class Temporary

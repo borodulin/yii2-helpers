@@ -8,7 +8,8 @@
 namespace conquer\helpers;
 
 /**
- *
+ * Trait CurlTrait
+ * @package conquer\helpers
  * @author Andrey Borodulin
  */
 trait CurlTrait

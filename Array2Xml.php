@@ -8,6 +8,8 @@
 namespace conquer\helpers;
 
 /**
+ * Class Array2Xml
+ * @package conquer\helpers
  * @author Andrey Borodulin
  */
 class Array2Xml
