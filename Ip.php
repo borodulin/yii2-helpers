@@ -7,6 +7,8 @@
 
 namespace conquer\helpers;
 
+use yii\helpers\IpHelper;
+
 /**
  * Class Ip
  * @package conquer\helpers
@@ -15,47 +17,53 @@ namespace conquer\helpers;
 class Ip
 {
     /**
-     * Retrieves the best guess of the client's actual IP address.
-     * Takes into account numerous HTTP proxy headers due to variations
-     * in how different ISPs handle IP addresses in headers between hops.
+     * IP addresses or CIDR ranges of reverse proxies whose X-Forwarded-For header is trusted,
+     * e.g. ['10.0.0.0/8', '127.0.0.1'].
+     * By default no proxy is trusted and REMOTE_ADDR is returned: client-supplied headers such as
+     * Client-IP or X-Forwarded-For can be spoofed by anyone.
+     * @var string[]
+     */
+    public static $trustedProxies = [];
+
+    /**
+     * Returns the client IP address.
+     * X-Forwarded-For is used only when the request comes from a trusted proxy;
+     * the right-most address that is not a trusted proxy is returned.
+     * @return string
      */
     public static function getIpAddress()
     {
-        // check for shared internet/ISP IP
-        if (isset($_SERVER['HTTP_CLIENT_IP']) && self::validateIp($_SERVER['HTTP_CLIENT_IP'])) {
-            return $_SERVER['HTTP_CLIENT_IP'];
+        $remoteAddr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+        if (!static::isTrustedProxy($remoteAddr) || empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            return $remoteAddr;
         }
-
-        // check for IPs passing through proxies
-        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            // check if multiple ips exist in var
-            if (strpos($_SERVER['HTTP_X_FORWARDED_FOR'], ',') !== false) {
-                $iplist = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-                foreach ($iplist as $ip) {
-                    if (self::validateIp($ip)) {
-                        return $ip;
-                    }
-                }
-            } else {
-                if (self::validateIp($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                    return $_SERVER['HTTP_X_FORWARDED_FOR'];
-                }
+        $chain = array_reverse(array_map('trim', explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])));
+        foreach ($chain as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP) === false) {
+                break;
+            }
+            if (!static::isTrustedProxy($ip)) {
+                return $ip;
             }
         }
-        if (isset($_SERVER['HTTP_X_FORWARDED']) && self::validateIp($_SERVER['HTTP_X_FORWARDED'])) {
-            return $_SERVER['HTTP_X_FORWARDED'];
+        return $remoteAddr;
+    }
+
+    /**
+     * @param string $ip
+     * @return bool
+     */
+    public static function isTrustedProxy($ip)
+    {
+        if (filter_var($ip, FILTER_VALIDATE_IP) === false) {
+            return false;
         }
-        if (isset($_SERVER['HTTP_X_CLUSTER_CLIENT_IP']) && self::validateIp($_SERVER['HTTP_X_CLUSTER_CLIENT_IP'])) {
-            return $_SERVER['HTTP_X_CLUSTER_CLIENT_IP'];
+        foreach (static::$trustedProxies as $range) {
+            if (IpHelper::inRange($ip, strpos($range, '/') === false ? $range . (strpos($range, ':') === false ? '/32' : '/128') : $range)) {
+                return true;
+            }
         }
-        if (isset($_SERVER['HTTP_FORWARDED_FOR']) && self::validateIp($_SERVER['HTTP_FORWARDED_FOR'])) {
-            return $_SERVER['HTTP_FORWARDED_FOR'];
-        }
-        if (isset($_SERVER['HTTP_FORWARDED']) && self::validateIp($_SERVER['HTTP_FORWARDED'])) {
-            return $_SERVER['HTTP_FORWARDED'];
-        }
-        // return unreliable ip since all else failed
-        return isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+        return false;
     }
 
     /**

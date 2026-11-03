@@ -52,8 +52,8 @@ class Temporary
      */
     public function dir()
     {
-        $this->_name = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid($this->_prefix);
-        if (!mkdir($this->_name)) {
+        $this->_name = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $this->_prefix . bin2hex(random_bytes(16));
+        if (!mkdir($this->_name, 0700)) {
             throw new \Exception('Cannot create temporary directory');
         }
         return $this;

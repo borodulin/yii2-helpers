@@ -22,16 +22,37 @@
     ],
     "extra": {
         "branch-alias": {
-            "dev-master": "2.1.x-dev"
+            "dev-master": "2.2.x-dev"
         }
     },
     "require": {
         "php": "^7.4 || ^8.0",
-        "yiisoft/yii2": "^2.0.13"
+        "yiisoft/yii2": "^2.0.14"
     },
     "autoload": {
         "psr-4": {
             "conquer\\helpers\\": ""
         }
-    }
+    },
+    "require-dev": {
+        "codeception/codeception": "^4.2 || ^5.0",
+        "codeception/module-asserts": "^2.0 || ^3.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "tests\\": "tests/_support/",
+            "tests\\unit\\": "tests/unit/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ]
 }

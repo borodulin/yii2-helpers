@@ -24,7 +24,8 @@ trait CurlTrait
             CURLOPT_HEADERFUNCTION => array($this, 'headerCallback'),
             CURLOPT_MAXREDIRS => 5,
             CURLOPT_CONNECTTIMEOUT => 30,
-            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_TIMEOUT => 30,
         ];
         if ($this->_autoCookie) {
