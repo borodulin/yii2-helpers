@@ -7,6 +7,7 @@
 
 namespace conquer\helpers;
 
+use DOMAttr;
 use DOMDocument;
 use DOMNode;
 use DOMNodeList;
@@ -67,7 +68,8 @@ class XPath
             if ($elements->hasChildNodes()) {
                 $result = [];
                 foreach ($elements->childNodes as $element) {
-                    if ($element->nodeType != 3) {
+                    // only child elements; text, CDATA, comments and processing instructions are skipped
+                    if ($element->nodeType === XML_ELEMENT_NODE) {
                         if (isset($result[$element->nodeName])) {
                             if (is_array($result[$element->nodeName]) && !self::isAssociative($result[$element->nodeName])) {
                                 $result[$element->nodeName][] = self::xmlToArray($element);
@@ -217,22 +219,54 @@ class XPath
     }
 
     /**
-     *
+     * Evaluates the XPath expression.
+     * For a node set the value of the first node is returned (null for an empty set),
+     * an empty string result is returned as null, numbers and booleans are returned as is.
      * @param string $path
      * @param DOMNode $contextNode
-     * @return NULL|mixed
+     * @return NULL|string|float|bool
      */
-    public function evalute($path, $contextNode = null)
+    public function evaluate($path, $contextNode = null)
     {
         $entries = $this->_xpath->evaluate($path, $contextNode);
-        if (is_a($entries, 'DOMNodeList')) {
+        if ($entries instanceof DOMNodeList) {
             if ($entries->length > 0) {
                 return $entries->item(0)->nodeValue;
             } else {
                 return null;
             }
         }
-        return $entries ?: null;
+        if (is_string($entries) && $entries === '') {
+            return null;
+        }
+        return $entries;
+    }
+
+    /**
+     * @deprecated misspelled, use evaluate()
+     * @param string $path
+     * @param DOMNode $contextNode
+     * @return NULL|string|float|bool
+     */
+    public function evalute($path, $contextNode = null)
+    {
+        return $this->evaluate($path, $contextNode);
+    }
+
+    /**
+     * Sets the text of an element or the value of an attribute; special characters are escaped.
+     * @param DOMNode $node
+     * @param string $value
+     */
+    protected static function setNodeText($node, $value)
+    {
+        if ($node instanceof DOMAttr || $node instanceof \DOMElement) {
+            // nodeValue/value setters parse entities; a text node is always escaped
+            $node->nodeValue = '';
+            $node->appendChild($node->ownerDocument->createTextNode((string)$value));
+        } else {
+            $node->nodeValue = (string)$value;
+        }
     }
 
     /**
@@ -258,7 +292,9 @@ class XPath
             foreach ($value as $val) {
                 $result[] = self::clearTextConcat($val);
             }
-            return implode(' ', array_filter($result, 'strlen'));
+            return implode(' ', array_filter($result, function ($v) {
+                return $v !== null && $v !== '';
+            }));
         }
         return null;
     }
@@ -304,8 +340,7 @@ class XPath
     {
         $elements = $this->_xpath->query($path, $contextNode);
         if ($elements->length > 0) {
-            $el = $elements->item(0);
-            $el->nodeValue = $value;
+            static::setNodeText($elements->item(0), $value);
             return true;
         }
         return false;
@@ -323,7 +358,7 @@ class XPath
         $elements = $this->_xpath->query($path, $contextNode);
         if ($elements->length > 0) {
             foreach ($elements as $el) {
-                $el->nodeValue = $value;
+                static::setNodeText($el, $value);
             }
             return true;
         }
@@ -343,7 +378,7 @@ class XPath
             $elements = $this->_xpath->query($path, $contextNode);
             if ($elements->length > 0) {
                 foreach ($elements as $el) {
-                    $el->nodeValue = $value;
+                    static::setNodeText($el, $value);
                     $result++;
                 }
             }

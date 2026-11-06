@@ -41,7 +41,7 @@ class Temporary
 
     public function __toString()
     {
-        return $this->_name;
+        return (string)$this->_name;
     }
 
     /**
@@ -66,13 +66,30 @@ class Temporary
      */
     public function file()
     {
-        $this->_name = tempnam(sys_get_temp_dir(), $this->_prefix);
+        $name = tempnam(sys_get_temp_dir(), $this->_prefix);
+        if ($name === false) {
+            throw new \Exception('Cannot create temporary file');
+        }
+        $this->_name = $name;
         return $this;
     }
 
+    /**
+     * Removes the temporary file or directory (recursively).
+     * Symbolic links inside the directory are removed themselves, their targets are never touched.
+     */
     public function clear()
     {
-        if (is_dir($this->_name)) {
+        $index = array_search($this, self::$_temporaries, true);
+        if ($index !== false) {
+            unset(self::$_temporaries[$index]);
+        }
+        if ($this->_name === null) {
+            return;
+        }
+        if (is_link($this->_name)) {
+            static::unlinkLink($this->_name);
+        } elseif (is_dir($this->_name)) {
             static::rmDir($this->_name);
         } elseif (file_exists($this->_name)) {
             unlink($this->_name);
@@ -85,13 +102,29 @@ class Temporary
 
         foreach ($files as $file) {
             $filename = $dir . DIRECTORY_SEPARATOR . $file;
-            if (is_dir($filename)) {
+            if (is_link($filename)) {
+                static::unlinkLink($filename);
+            } elseif (is_dir($filename)) {
                 static::rmDir($filename);
             } else {
                 unlink($filename);
             }
         }
         return rmdir($dir);
+    }
+
+    /**
+     * Removes a symbolic link without following it.
+     * @param string $link
+     * @return bool
+     */
+    protected static function unlinkLink($link)
+    {
+        // on Windows a link to a directory has to be removed with rmdir()
+        if (DIRECTORY_SEPARATOR === '\\' && is_dir($link)) {
+            return rmdir($link);
+        }
+        return unlink($link);
     }
 
     public static function clearAll()

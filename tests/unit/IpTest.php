@@ -35,4 +35,25 @@ class IpTest extends \Codeception\Test\Unit
         $_SERVER['HTTP_X_FORWARDED_FOR'] = 'not-an-ip';
         $this->assertSame('127.0.0.1', Ip::getIpAddress());
     }
+
+    public function testValidateIp()
+    {
+        foreach (['1.1.1.1', '2.2.2.2', '8.8.8.8', '2a00:1450:4001:80b::200e'] as $ip) {
+            $this->assertTrue(Ip::validateIp($ip), $ip);
+        }
+        foreach (['10.1.2.3', '172.16.0.1', '192.168.1.1', '127.0.0.1', '169.254.1.1', '100.64.0.1',
+                     '224.0.0.1', '255.255.255.255', '0.0.0.0', '::1', 'fe80::1', 'fd00::1', 'garbage', '', null] as $ip) {
+            $this->assertFalse(Ip::validateIp($ip), var_export($ip, true));
+        }
+    }
+
+    public function testGetLongIp()
+    {
+        $_SERVER['REMOTE_ADDR'] = '8.8.8.8';
+        $this->assertSame(ip2long('8.8.8.8'), Ip::getLongIp());
+        $_SERVER['REMOTE_ADDR'] = 'garbage';
+        $this->assertNull(Ip::getLongIp());
+        $_SERVER['REMOTE_ADDR'] = '2a00:1450:4001:80b::200e';
+        $this->assertNull(Ip::getLongIp());
+    }
 }

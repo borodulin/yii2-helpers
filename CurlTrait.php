@@ -27,13 +27,13 @@ trait CurlTrait
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_TIMEOUT => 30,
+            // only HTTP(S), also for redirects: no file://, gopher://, dict:// etc.
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
         ];
         if ($this->_autoCookie) {
-            if (strncasecmp(PHP_OS, 'Win', 3) === 0) {
-                $options[CURLOPT_COOKIEJAR] = 'NUL';
-            } else {
-                $options[CURLOPT_COOKIEJAR] = '/dev/null';
-            }
+            // an empty file name enables the in-memory cookie engine without reading or writing any file
+            $options[CURLOPT_COOKIEFILE] = '';
         }
         return $options;
     }
@@ -80,10 +80,9 @@ trait CurlTrait
     protected $_errorMessage;
 
     /**
-     * Use /dev/null as a cookie storage.
-     * This will prevent the cookies from being written to disk,
-     * but it will keep them around in memory as long as you reuse the handle and don't call curl_easy_cleanup()
-     * @link http://stackoverflow.com/questions/1486099/any-way-to-keep-curls-cookies-in-memory-and-not-on-disk
+     * Enables the in-memory cookie engine: cookies set by the server are sent back
+     * on the redirects of the same request. Nothing is written to disk.
+     * Cookies are not kept between executions, use getCookies() and CURLOPT_COOKIE for that.
      * @var boolean
      */
     protected $_autoCookie = false;
@@ -144,8 +143,8 @@ trait CurlTrait
     }
 
     /**
-     * Setter for CURL Options
-     * Warning! setoptions clears all previously setted options and post data
+     * Setter for CURL Options.
+     * The given options are merged into the current ones; use resetOptions() to clear them.
      * @see curl_setopt_array
      * @param array $options
      * @return static
@@ -229,11 +228,36 @@ trait CurlTrait
     }
 
     /**
+     * Clears the results of the previous execution.
+     */
+    protected function resetResult()
+    {
+        $this->_header = null;
+        $this->_content = null;
+        $this->_info = null;
+        $this->_errorCode = null;
+        $this->_errorMessage = null;
+    }
+
+    /**
+     * @param resource|\CurlHandle $ch
+     */
+    private static function closeHandle($ch)
+    {
+        // curl_close() has no effect since PHP 8.0 and is deprecated since PHP 8.5
+        if (PHP_VERSION_ID < 80000) {
+            curl_close($ch);
+        }
+    }
+
+    /**
      * Executes the single curl
      * @return boolean
      */
     protected function curl_execute()
     {
+        $this->resetResult();
+
         $ch = curl_init();
 
         curl_setopt_array($ch, $this->getOptions());
@@ -247,7 +271,7 @@ trait CurlTrait
         if ($this->_errorCode) {
             $this->_errorMessage = curl_error($ch);
         }
-        curl_close($ch);
+        self::closeHandle($ch);
         return $this->isHttpOK();
     }
 
@@ -260,6 +284,7 @@ trait CurlTrait
         $nodes = [];
         /* @var $url CurlTrait */
         foreach ($urls as $url) {
+            $url->resetResult();
             $ch = curl_init();
             $nodes[] = ['ch' => $ch, 'url' => $url];
 
@@ -273,9 +298,15 @@ trait CurlTrait
 
         //execute the handles
         do {
-            curl_multi_exec($mh, $running);
-            curl_multi_select($mh);
-        } while ($running > 0);
+            $status = curl_multi_exec($mh, $running);
+            if ($running > 0 && curl_multi_select($mh) === -1) {
+                usleep(1000);
+            }
+        } while ($running > 0 && in_array($status, [CURLM_OK, CURLM_CALL_MULTI_PERFORM], true));
+
+        // transfer results; this also makes curl_errno()/curl_error() work for the easy handles
+        while (curl_multi_info_read($mh) !== false) {
+        }
 
         foreach ($nodes as $node) {
             /* @var $url Curl */
@@ -295,6 +326,7 @@ trait CurlTrait
         //close the handles
         foreach ($nodes as $node) {
             curl_multi_remove_handle($mh, $node['ch']);
+            self::closeHandle($node['ch']);
         }
         curl_multi_close($mh);
     }

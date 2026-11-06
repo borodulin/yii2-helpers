@@ -67,62 +67,51 @@ class Ip
     }
 
     /**
-     * Ensures an ip address is both a valid IP and does not fall within
-     * a private network range.
-     * @param $ip
+     * IPv4 ranges that are not covered by FILTER_FLAG_NO_PRIV_RANGE / FILTER_FLAG_NO_RES_RANGE
+     * on all supported PHP versions, but are not public unicast addresses either.
+     * @var string[]
+     */
+    private static $_nonPublicRanges = [
+        '100.64.0.0/10',   // carrier-grade NAT
+        '192.0.0.0/24',    // IETF protocol assignments
+        '192.0.2.0/24',    // TEST-NET-1
+        '198.18.0.0/15',   // benchmarking
+        '198.51.100.0/24', // TEST-NET-2
+        '203.0.113.0/24',  // TEST-NET-3
+        '224.0.0.0/4',     // multicast
+        '2001:db8::/32',   // IPv6 documentation
+        'ff00::/8',        // IPv6 multicast
+    ];
+
+    /**
+     * Ensures an ip address is both a valid IP (v4 or v6) and a public one:
+     * private, loopback, link-local, reserved, multicast and documentation ranges are rejected.
+     * @param string $ip
      * @return bool
      */
     public static function validateIp($ip)
     {
-        if (strtolower($ip) === 'unknown') {
+        if (!is_string($ip) || filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
             return false;
         }
-        // generate ipv4 network address
-        $ip = ip2long($ip);
-
-        // if the ip is set and not equivalent to 255.255.255.255
-        if (($ip !== false) && ($ip !== -1)) {
-            // make sure to get unsigned long representation of ip
-            // due to discrepancies between 32 and 64 bit OSes and
-            // signed numbers (ints default to signed in PHP)
-            $ip = sprintf('%u', $ip);
-            // do private network range checking
-            if ($ip >= 0 && $ip <= 50331647) {
-                return false;
-            }
-            if ($ip >= 167772160 && $ip <= 184549375) {
-                return false;
-            }
-            if ($ip >= 2130706432 && $ip <= 2147483647) {
-                return false;
-            }
-            if ($ip >= 2851995648 && $ip <= 2852061183) {
-                return false;
-            }
-            if ($ip >= 2886729728 && $ip <= 2887778303) {
-                return false;
-            }
-            if ($ip >= 3221225984 && $ip <= 3221226239) {
-                return false;
-            }
-            if ($ip >= 3232235520 && $ip <= 3232301055) {
-                return false;
-            }
-            if ($ip >= 4294967040) {
+        foreach (self::$_nonPublicRanges as $range) {
+            if (IpHelper::inRange($ip, $range)) {
                 return false;
             }
         }
         return true;
     }
 
-
+    /**
+     * Returns the client IPv4 address as an integer, or null when it is not a public IPv4 address.
+     * @return int|null
+     */
     public static function getLongIp()
     {
         $ipAddress = self::getIpAddress();
-        if (self::validateIp($ipAddress)) {
+        if (self::validateIp($ipAddress) && filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false) {
             return ip2long($ipAddress);
-        } else {
-            return null;
         }
+        return null;
     }
 }

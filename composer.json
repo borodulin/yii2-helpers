@@ -29,6 +29,10 @@
         "php": "^7.4 || ^8.0",
         "yiisoft/yii2": "^2.0.14"
     },
+    "suggest": {
+        "ext-curl": "Required by Curl / CurlTrait",
+        "ext-dom": "Required by XPath"
+    },
     "autoload": {
         "psr-4": {
             "conquer\\helpers\\": ""
